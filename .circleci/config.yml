@@ -3,6 +3,12 @@ jobs:
   build:
     docker:
       - image: cimg/base:2020.01
+        environment: 
+          LC_CTYPE: en_US.UTF-8
+          LANG: en_US.UTF-8
+          LANGUAGE: en_US:en
+          LC_ALL: en_US.UTF-8
+# to mimic env settings from docker file 
     steps:
       - checkout
       - run:
@@ -13,3 +19,10 @@ jobs:
           name: Is there code here?
           command: |
             ls -al
+      - run:
+          name: Install OpenMC
+          command: |
+            apt-get --yes update && apt-get --yes upgrade
+            apt-get -y install locale
+            locale-gen en_US.UTF-8
+            
