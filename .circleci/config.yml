@@ -80,3 +80,7 @@ jobs:
             sudo pip3 install numpydoc
             sudo pip3 install nbconvert
             sudo pip3 install nose
+            echo "===================Clone and install NJOY2016=================="
+            sudo git clone https://github.com/njoy/NJOY2016 /opt/NJOY2016 && cd /opt/NJOY2016 && mkdir build && cd build && sudo cmake -Dstatic=on .. && sudo make 2>/dev/null && sudo make install
+            sudo rm /usr/bin/python
+            sudo ln -s /usr/bin/python3 /usr/bin/python
