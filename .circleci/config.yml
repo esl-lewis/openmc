@@ -24,6 +24,6 @@ jobs:
           command: |
             sudo apt-get --yes update && sudo apt-get --yes upgrade
             sudo apt-get -y install locales
-            locale-gen en_US.UTF-8
+ # locale-gen en_US.UTF-8
             echo "this is trying to install"
             
