@@ -22,8 +22,32 @@ jobs:
       - run:
           name: Install OpenMC
           command: |
+            echo "Install required packages"
             sudo apt-get --yes update && sudo apt-get --yes upgrade
             sudo apt-get -y install locales
-            sudo locale
-            echo "this is trying to install"
-            
+            sudo apt-get --yes install gfortran 
+            sudo apt-get --yes install g++ 
+            sudo apt-get --yes install cmake 
+            sudo apt-get --yes install libhdf5-dev 
+            sudo apt-get --yes install git
+            sudo apt-get update
+            sudo apt-get install -y python3-pip
+            sudo apt-get install -y python3-dev
+            sudo apt-get install -y python3-setuptools
+            sudo ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+            sudo apt-get install -y ipython3
+            sudo apt-get update
+            sudo apt-get install -y python3-tk
+            echo "Install unzip"
+            sudo apt-get update
+            sudo apt-get install -y unzip
+            echo "Install optional packages"
+            sudo apt-get --yes update
+            sudo apt-get --yes install imagemagick
+            sudo apt-get --yes install hdf5-tools
+            sudo apt-get --yes install paraview
+            sudo apt-get --yes install eog
+            sudo apt-get --yes install wget
+            sudo apt-get --yes install firefox
+            sudo apt-get --yes install dpkg
+            sudo apt-get --yes install libxkbfile1
