@@ -12,15 +12,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Check things are working
-          command: |
-            echo "they are!"
-      - run:
           name: Is there code here?
           command: |
             ls -al
       - run:
-          name: Install OpenMC
+          name: Install OpenMC requirements
           command: |
             echo "=============Install required packages============="
             sudo apt-get --yes update && sudo apt-get --yes upgrade
@@ -84,3 +80,13 @@ jobs:
             sudo git clone https://github.com/njoy/NJOY2016 /opt/NJOY2016 && cd /opt/NJOY2016 && mkdir build && cd build && sudo cmake -Dstatic=on .. && sudo make 2>/dev/null && sudo make install
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
+      - run:
+          name: Install OpenMC
+          command: |
+            echo "==============Build OpenMC====================="
+            cd openmc && mkdir build && cd build && sudo cmake .. && sudo make && sudo make install
+            cd /openmc && python3 setup.py develop
+            sudo git clone https://github.com/openmc-dev/plotter.git
+            echo 'export PATH=$PATH:/plotter/' >> ~/.bashrc
+            echo 'alias python="python3"' >> ~/.bashrc
+            echo "I have finished!"
