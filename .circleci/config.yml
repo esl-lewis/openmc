@@ -31,11 +31,16 @@ jobs:
             sudo apt-get --yes install libhdf5-dev 
             sudo apt-get --yes install git
             sudo apt-get update
+            echo "checking for break 1"
             sudo apt-get install -y python3-pip
+            echo "checking for break 2"
             sudo apt-get install -y python3-dev
+            echo "checking for break 3"
             sudo apt-get install -y python3-setuptools
+            echo "checking for break 4"
             sudo apt-get install -y ipython3
             sudo apt-get update
+            echo "checking for break 5"
             sudo apt-get install -y python3-tk
             echo "Install unzip"
             sudo apt-get update
@@ -50,3 +55,5 @@ jobs:
             sudo apt-get --yes install firefox
             sudo apt-get --yes install dpkg
             sudo apt-get --yes install libxkbfile1
+            echo "Install optional packages for distributed memory parallel simulations"
+            
