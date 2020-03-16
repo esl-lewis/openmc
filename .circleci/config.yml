@@ -56,4 +56,32 @@ jobs:
             sudo apt-get --yes install dpkg
             sudo apt-get --yes install libxkbfile1
             echo "Install optional packages for distributed memory parallel simulations"
-            
+            sudo apt install --yes mpich libmpich-dev
+            sudo apt install --yes openmpi-bin libopenmpi-dev
+            sudo apt-get --yes install libblas-dev 
+            sudo apt-get --yes install liblapack-dev
+            echo "Install required Python prerequisites"
+            sudo pip3 install numpy
+            sudo pip3 install pandas
+            sudo pip3 install six
+            sudo pip3 install h5py
+            sudo pip3 install Matplotlib
+            sudo pip3 install uncertainties
+            sudo pip3 install lxml
+            sudo pip3 install scipy
+            echo "Install optional Python prerequisites"
+            sudo pip3 install cython
+            sudo pip3 install vtk
+            sudo apt-get install --yes libsilo-dev
+            sudo pip3 install pytest
+            sudo pip3 install codecov
+            sudo pip3 install pytest-cov
+            sudo pip3 install pylint
+            echo "Install Pyne requirements"
+            sudo pip3 install tables
+            sudo pip3 install setuptools
+            sudo pip3 install prettytable
+            sudo pip3 install sphinxcontrib_bibtex
+            sudo pip3 install numpydoc
+            sudo pip3 install nbconvert
+            sudo pip3 install nose
