@@ -22,7 +22,7 @@ jobs:
       - run:
           name: Install OpenMC
           command: |
-            echo "Install required packages"
+            echo "=============Install required packages============="
             sudo apt-get --yes update && sudo apt-get --yes upgrade
             sudo apt-get -y install locales
             sudo apt-get --yes install gfortran 
@@ -31,21 +31,16 @@ jobs:
             sudo apt-get --yes install libhdf5-dev 
             sudo apt-get --yes install git
             sudo apt-get update
-            echo "checking for break 1"
             sudo apt-get install -y python3-pip
-            echo "checking for break 2"
             sudo apt-get install -y python3-dev
-            echo "checking for break 3"
             sudo apt-get install -y python3-setuptools
-            echo "checking for break 4"
             sudo apt-get install -y ipython3
             sudo apt-get update
-            echo "checking for break 5"
             sudo apt-get install -y python3-tk
-            echo "Install unzip"
+            echo "=============Install unzip==================="
             sudo apt-get update
             sudo apt-get install -y unzip
-            echo "Install optional packages"
+            echo "============Install optional packages=========="
             sudo apt-get --yes update
             sudo apt-get --yes install imagemagick
             sudo apt-get --yes install hdf5-tools
@@ -55,12 +50,12 @@ jobs:
             sudo apt-get --yes install firefox
             sudo apt-get --yes install dpkg
             sudo apt-get --yes install libxkbfile1
-            echo "Install optional packages for distributed memory parallel simulations"
+            echo "=========Install optional packages for distributed memory parallel simulations========="
             sudo apt install --yes mpich libmpich-dev
             sudo apt install --yes openmpi-bin libopenmpi-dev
             sudo apt-get --yes install libblas-dev 
             sudo apt-get --yes install liblapack-dev
-            echo "Install required Python prerequisites"
+            echo "================Install required Python prerequisites===================="
             sudo pip3 install numpy
             sudo pip3 install pandas
             sudo pip3 install six
@@ -69,7 +64,7 @@ jobs:
             sudo pip3 install uncertainties
             sudo pip3 install lxml
             sudo pip3 install scipy
-            echo "Install optional Python prerequisites"
+            echo "==================Install optional Python prerequisites===================="
             sudo pip3 install cython
             sudo pip3 install vtk
             sudo apt-get install --yes libsilo-dev
@@ -77,7 +72,7 @@ jobs:
             sudo pip3 install codecov
             sudo pip3 install pytest-cov
             sudo pip3 install pylint
-            echo "Install Pyne requirements"
+            echo "===================Install Pyne requirements=================="
             sudo pip3 install tables
             sudo pip3 install setuptools
             sudo pip3 install prettytable
