@@ -22,8 +22,8 @@ jobs:
       - run:
           name: Install OpenMC
           command: |
-            apt-get --yes update && apt-get --yes upgrade
-            apt-get -y install locale
+            sudo apt-get --yes update && sudo apt-get --yes upgrade
+            sudo apt-get -y install locale
             locale-gen en_US.UTF-8
             echo "this is trying to install"
             
