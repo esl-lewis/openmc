@@ -83,8 +83,9 @@ jobs:
           name: Install OpenMC
           command: |
             echo "==============Build OpenMC====================="
+            cp CMakeLists.txt openmc/CMakeLists.txt
             cd openmc && mkdir build && cd build && sudo cmake .. && sudo make && sudo make install
-            cd /openmc && python3 setup.py develop
+            cd opt/openmc && python3 setup.py develop
             echo"==========Likewise git cloning the plotter will fail, looking for workaround"
             echo "I have finished!"
             
