@@ -76,15 +76,7 @@ jobs:
             sudo pip3 install numpydoc
             sudo pip3 install nbconvert
             sudo pip3 install nose
-            echo "=====================To get past the interactive git clone SSH prompt===================="
-            ssh-keygen -R github.com
-            ssh-keygen -R 140.82.113.3
-            ssh-keygen -R github.com,140.82.113.3
-            ssh-keyscan -H github.com,140.82.113.3 >> ~/.ssh/known_hosts
-            ssh-keyscan -H 140.82.113.3 >> ~/.ssh/known_hosts
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            echo "===================Clone and install NJOY2016=================="
-            sudo git clone https://github.com/njoy/NJOY2016 /opt/NJOY2016 && cd /opt/NJOY2016 && mkdir build && cd build && sudo cmake -Dstatic=on .. && sudo make 2>/dev/null && sudo make install
+            echo "=====================We skip NJOY for now but need to get it from elsewhere===================="
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
       - run:
@@ -93,7 +85,6 @@ jobs:
             echo "==============Build OpenMC====================="
             cd openmc && mkdir build && cd build && sudo cmake .. && sudo make && sudo make install
             cd /openmc && python3 setup.py develop
-            sudo git clone https://github.com/openmc-dev/plotter.git
-            echo 'export PATH=$PATH:/plotter/' >> ~/.bashrc
-            echo 'alias python="python3"' >> ~/.bashrc
+            echo"==========Likewise git cloning the plotter will fail, looking for workaround"
             echo "I have finished!"
+            
