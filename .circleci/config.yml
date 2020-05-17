@@ -18,6 +18,9 @@ jobs:
             cd ..
             echo dingdingding
             ls -al
+            cd ..
+            echo dongdongdong
+            ls -al
       - run:
           name: Install OpenMC requirements
           command: |
