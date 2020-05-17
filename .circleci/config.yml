@@ -17,6 +17,7 @@ jobs:
             echo 'the code is here'
             ls -al
             sudo mkdir /opt/openmc
+            echo $SHELL
             sudo shopt -s dotglob nullglob
             sudo mv * /opt/openmc/
             sudo cd /opt/openmc
