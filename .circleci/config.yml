@@ -16,11 +16,8 @@ jobs:
           command: |
             echo 'the code is here'
             ls -al
+            echo "$(pwd)"
             sudo mkdir /opt/openmc
-            echo $SHELL
-            sudo shopt -s dotglob nullglob
-            sudo mv * /opt/openmc/
-            sudo cd /opt/openmc
             echo 'success if the code is now here'
       - run:
           name: Install OpenMC requirements
