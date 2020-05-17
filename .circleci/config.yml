@@ -16,10 +16,10 @@ jobs:
           command: |
             echo 'the code is here'
             ls -al
-            mkdir /opt/openmc
-            shopt -s dotglob nullglob
-            mv * /opt/openmc/
-            cd /opt/openmc
+            sudo mkdir /opt/openmc
+            sudo shopt -s dotglob nullglob
+            sudo mv * /opt/openmc/
+            sudo cd /opt/openmc
             echo 'success if the code is now here'
       - run:
           name: Install OpenMC requirements
