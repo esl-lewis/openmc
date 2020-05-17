@@ -14,16 +14,13 @@ jobs:
       - run:
           name: Is there code here?
           command: |
+            echo 'the code is here'
             ls -al
-            cd ..
-            echo dingdingding
-            ls -al
-            cd ..
-            echo dongdongdong
-            ls -al
-            cd ..
-            echo justaplaceholder
-            ls -al
+            mkdir /opt/openmc
+            shopt -s dotglob nullglob
+            mv * /opt/openmc/
+            cd /opt/openmc
+            echo 'success if the code is now here'
       - run:
           name: Install OpenMC requirements
           command: |
