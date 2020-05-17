@@ -16,7 +16,7 @@ jobs:
           command: |
             sudo mkdir /opt/openmc
             sudo cp -r /home/circleci/project/. /opt/openmc
-            sudo cd /opt/openmc
+            cd /opt/openmc
             ls -la
             echo 'success if the code is now here'
       - run:
