@@ -14,10 +14,10 @@ jobs:
       - run:
           name: Is there code here?
           command: |
-            echo 'the code is here'
-            ls -al
-            echo "$(pwd)"
             sudo mkdir /opt/openmc
+            sudo cp -r /home/circleci/project/. /opt/openmc
+            sudo cd /opt/openmc
+            ls -la
             echo 'success if the code is now here'
       - run:
           name: Install OpenMC requirements
