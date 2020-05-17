@@ -10,14 +10,13 @@ jobs:
           LC_ALL: en_US.UTF-8
 # to mimic env settings from docker file 
     steps:
-      - run:
-          name: Show me what is here
-          command: | 
-          echo hello
       - checkout
       - run:
           name: Is there code here?
           command: |
+            ls -al
+            cd ..
+            echo dingdingding
             ls -al
       - run:
           name: Install OpenMC requirements
