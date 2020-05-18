@@ -84,6 +84,8 @@ jobs:
             sudo pip3 install nose
             echo "=====================Clone NJOY===================="
             sudo echo -e "Host git@github.com \n StrictHostKeyChecking no" > ~/.ssh/config
+            sudo mkdir /opt/NJOY2016
+            echo "is this going to overwrite?"
             git clone https://github.com/njoy/NJOY2016 /opt/NJOY2016 
             cd /opt/NJOY2016 && mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
             sudo rm /usr/bin/python
