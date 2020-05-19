@@ -89,13 +89,13 @@ jobs:
             echo "=====================Clone NJOY===================="
             sudo mkdir /opt/NJOY2016
             GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/njoy/NJOY2016 ./NJOY
-            cd /opt/NJOY2016 && mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
+            cd /opt/NJOY2016 && sudo mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
       - run:
           name: Install OpenMC
           command: |
             cd /opt/openmc
             echo "==============Build OpenMC====================="
-            cd openmc && mkdir build && cd build && sudo cmake -Ddebug=on && sudo make && sudo make install
+            cd openmc && sudo mkdir build && cd build && sudo cmake -Ddebug=on && sudo make && sudo make install
             cd opt/openmc && python3 setup.py develop
             echo"==========Likewise git cloning the plotter will fail, looking for workaround"
             echo "I have finished!"
