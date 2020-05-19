@@ -88,8 +88,7 @@ jobs:
             sudo ln -s /usr/bin/python3 /usr/bin/python
             echo "=====================Clone NJOY===================="
             sudo mkdir /opt/NJOY2016
-            sudo echo -e "Host git@github.com \n StrictHostKeyChecking no" > ~/.ssh/config
-            sudo git clone https://github.com/njoy/NJOY2016 /opt/NJOY2016 
+            GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/njoy/NJOY2016 ./NJOY
             cd /opt/NJOY2016 && mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
       - run:
           name: Install OpenMC
