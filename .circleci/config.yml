@@ -24,6 +24,7 @@ jobs:
             echo 'success if the code is now here'
             sudo echo -e "Host * \n   StrictHostKeyChecking no" > ~/.ssh/config
             sudo mkdir ./NJOY
+            chmod 777 ./NJOY
             cd ./NJOY
             git clone https://github.com/njoy/NJOY2016
             sudo mkdir /opt/NJOY
