@@ -21,7 +21,6 @@ jobs:
             ls -la
             echo 'success if the code is now here'
             sudo echo -e "Host git@github.com \n   StrictHostKeyChecking no" > ~/.ssh/config
-            sudo echo -e "Host git@github.com \n   StrictHostKeyChecking no" > ~/.ssh/config
       - run:
           name: Install OpenMC requirements
           command: |
