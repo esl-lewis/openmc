@@ -27,8 +27,9 @@ jobs:
             sudo chmod 777 ./NJOY
             cd ./NJOY
             git clone https://github.com/njoy/NJOY2016
+            cd ..
             sudo mkdir /opt/NJOY
-            sudo mv ./NJOY /opt/NJOY
+            sudo mv ./NJOY/ /opt/NJOY/
       - run:
           name: Install OpenMC requirements
           command: |
