@@ -9,6 +9,7 @@ jobs:
           LANGUAGE: en_US:en
           LC_ALL: en_US.UTF-8
 # to mimic env settings from docker file 
+# sudo echo -e "Host git@github.com \n   StrictHostKeyChecking no" > ~/.ssh/config
     steps:
       - checkout
       - run:
@@ -20,7 +21,7 @@ jobs:
             cd /opt/openmc
             ls -la
             echo 'success if the code is now here'
-            sudo echo -e "Host git@github.com \n   StrictHostKeyChecking no" > ~/.ssh/config
+            sudo GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/njoy/NJOY2016 /opt/NJOY
       - run:
           name: Install OpenMC requirements
           command: |
@@ -85,11 +86,7 @@ jobs:
             sudo pip3 install nose
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
-            echo "=====================Clone NJOY===================="
-            echo "I fail here"
-            echo "No I fail here"
-            sudo GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/njoy/NJOY2016 /opt/NJOY
-            echo "actually over here!"
+            echo "=====================Build NJOY===================="
             cd /opt/NJOY2016 && sudo mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
       - run:
           name: Install OpenMC
