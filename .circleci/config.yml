@@ -30,7 +30,7 @@ jobs:
             cd ..
             sudo mkdir /opt/NJOY
             sudo mv ./NJOY/ /opt/NJOY/
-            cd /opt/NJOY
+            cd /opt/NJOY/NJOY
             ls -la
       - run:
           name: Install OpenMC requirements
