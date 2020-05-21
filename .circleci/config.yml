@@ -105,6 +105,6 @@ jobs:
             echo "==============Build OpenMC====================="
             sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
             cd /opt/openmc && sudo python3 setup.py develop
-            echo"==========Likewise git cloning the plotter will fail, looking for workaround"
+            echo "==========Likewise git cloning the plotter will fail, looking for workaround"
             echo "I have finished!"
             
