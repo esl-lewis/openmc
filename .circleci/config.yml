@@ -28,9 +28,8 @@ jobs:
             cd ./NJOY
             git clone https://github.com/njoy/NJOY2016
             cd ..
-            sudo mkdir /opt/NJOY
             sudo mv ./NJOY/ /opt/NJOY/
-            cd /opt/NJOY/NJOY/NJOY2016
+            cd /opt/NJOY/NJOY2016
             ls -la
             echo "..."
       - run:
