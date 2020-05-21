@@ -33,7 +33,7 @@ jobs:
             cd /opt/NJOY/NJOY
             ls -la
             echo "..."
-            cat NJOY
+            cat NJOY2016
       - run:
           name: Install OpenMC requirements
           command: |
