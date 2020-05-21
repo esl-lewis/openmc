@@ -45,7 +45,7 @@ jobs:
             echo "=============Install required packages============="
             sudo apt-get --yes update && sudo apt-get --yes upgrade
             sudo apt-get -y install locales
-            sudo apt-get --yes install cmake=3.12.0 
+            sudo apt-get --yes install cmake
             sudo apt-get --yes install wget
             sudo apt-get --yes install gfortran 
             sudo apt-get --yes install g++ 
