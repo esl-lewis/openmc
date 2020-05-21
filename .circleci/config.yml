@@ -30,10 +30,9 @@ jobs:
             cd ..
             sudo mkdir /opt/NJOY
             sudo mv ./NJOY/ /opt/NJOY/
-            cd /opt/NJOY/NJOY
+            cd /opt/NJOY/NJOY/NJOY2016
             ls -la
             echo "..."
-            cat NJOY2016
       - run:
           name: Install OpenMC requirements
           command: |
