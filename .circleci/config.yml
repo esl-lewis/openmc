@@ -105,11 +105,12 @@ jobs:
             sudo pip3 install nose
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
-            echo "=====================Build MOAB and DAGMC===================="
+            echo "=====================Build MOAB===================="
             cd /home/MOAB
             sudo mkdir build && cd build
             sudo cmake ../moab -DENABLE_HDF5=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/MOAB/
             sudo make -j8 && sudo make -j8 install && sudo cmake ../moab -DBUILD_SHARED_LIBS=OFF && sudo make -j8 install
+            echo "=====================Build DAGMC===================="
             cd /home/DAGMC
             sudo mkdir build && cd build
             sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
