@@ -17,7 +17,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Is there code here?
+          name: Move OpenmMC to opt directory, clone MOAB and DAGMC
           command: |
             sudo mkdir /opt/openmc
             sudo cp -r /home/circleci/project/. /opt/openmc
@@ -26,12 +26,18 @@ jobs:
             ls -la
             echo 'success if the code is now here'
             sudo echo -e "Host * \n   StrictHostKeyChecking no" > ~/.ssh/config
-            sudo mkdir ./NJOY
-            sudo chmod 777 ./NJOY
-            cd ./NJOY
-            git clone https://github.com/njoy/NJOY2016
+            sudo mkdir ./MOAB
+            sudo chmod 777 ./MOAB
+            cd ./MOAB
+            git clone -b Version5.1.0 https://bitbucket.org/fathomteam/moab/
+            cd .. 
+            sudo mv ./MOAB/ /home/MOAB/
+            sudo mkdir ./DAGMC
+            sudo chmod 777 ./DAGMC
+            cd ./DAGMC
+            git clone -b develop https://github.com/svalinn/dagmc
             cd ..
-            sudo mv ./NJOY/ /opt/NJOY/      
+            sudo mv ./DAGMC/ /home/DAGMC/      
             ls -la
       - run:
           name: Install OpenMC requirements
@@ -39,7 +45,8 @@ jobs:
             echo "=============Install required packages============="
             sudo apt-get --yes update && sudo apt-get --yes upgrade
             sudo apt-get -y install locales
-            sudo apt-get --yes install cmake 
+            sudo apt-get --yes install cmake=3.12.0 
+            sudo apt-get --yes install wget
             sudo apt-get --yes install gfortran 
             sudo apt-get --yes install g++ 
             sudo apt-get --yes install libhdf5-dev 
@@ -97,7 +104,15 @@ jobs:
             sudo pip3 install nose
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
-            echo "=====================Build NJOY===================="
+            echo "=====================Build MOAB and DAGMC===================="
+            cd /home/MOAB
+            sudo mkdir build && sudo cd build
+            sudo cmake ../moab -DENABLE_HDF5=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/MOAB/
+            make -j8 && make -j8 install  && cmake ../moab -DBUILD_SHARED_LIBS=OFF && make -j8 install
+            cd /home/DAGMC
+            sudo mkdir build && sudo cd build
+            sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
+            make -j8 install
       - run:
           name: Install OpenMC
           command: |
