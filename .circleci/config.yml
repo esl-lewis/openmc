@@ -12,7 +12,8 @@ jobs:
 #
 # sudo GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" 
 # cd /opt/NJOY/NJOY2016
-
+# if we want to build NJOY
+# cd /opt/NJOY/NJOY2016 && sudo mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
     steps:
       - checkout
       - run:
@@ -97,7 +98,6 @@ jobs:
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
             echo "=====================Build NJOY===================="
-            cd /opt/NJOY/NJOY2016 && sudo mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
       - run:
           name: Install OpenMC
           command: |
