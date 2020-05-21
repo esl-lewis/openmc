@@ -46,6 +46,7 @@ jobs:
             sudo apt-get --yes update && sudo apt-get --yes upgrade
             sudo apt-get -y install locales
             sudo apt-get --yes install cmake
+            sudo apt-get --yes install curl
             sudo apt-get --yes install wget
             sudo apt-get --yes install gfortran 
             sudo apt-get --yes install g++ 
@@ -108,7 +109,7 @@ jobs:
             cd /home/MOAB
             sudo mkdir build && cd build
             sudo cmake ../moab -DENABLE_HDF5=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/MOAB/
-            make -j8 && make -j8 install  && cmake ../moab -DBUILD_SHARED_LIBS=OFF && make -j8 install
+            sudo make -j8 && sudo make -j8 install && sudo cmake ../moab -DBUILD_SHARED_LIBS=OFF && sudo make -j8 install
             cd /home/DAGMC
             sudo mkdir build && sudo cd build
             sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
