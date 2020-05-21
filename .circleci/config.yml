@@ -103,7 +103,7 @@ jobs:
           command: |
             cd /opt/openmc
             echo "==============Build OpenMC====================="
-            cd openmc && sudo mkdir build && cd build && sudo cmake -Ddebug=on && sudo make && sudo make install
+            cd openmc && sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
             cd opt/openmc && python3 setup.py develop
             echo"==========Likewise git cloning the plotter will fail, looking for workaround"
             echo "I have finished!"
