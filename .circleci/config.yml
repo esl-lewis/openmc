@@ -106,7 +106,7 @@ jobs:
             sudo ln -s /usr/bin/python3 /usr/bin/python
             echo "=====================Build MOAB and DAGMC===================="
             cd /home/MOAB
-            sudo mkdir build && sudo cd build
+            sudo mkdir build && cd build
             sudo cmake ../moab -DENABLE_HDF5=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/MOAB/
             make -j8 && make -j8 install  && cmake ../moab -DBUILD_SHARED_LIBS=OFF && make -j8 install
             cd /home/DAGMC
