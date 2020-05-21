@@ -116,7 +116,7 @@ jobs:
             cd /home/DAGMC
             sudo mkdir build && cd build
             sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
-            make -j8 install
+            sudo make -j8 install
       - run:
           name: Install OpenMC
           command: |
