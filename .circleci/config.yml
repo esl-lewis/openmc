@@ -111,7 +111,7 @@ jobs:
             sudo cmake ../moab -DENABLE_HDF5=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/MOAB/
             sudo make -j8 && sudo make -j8 install && sudo cmake ../moab -DBUILD_SHARED_LIBS=OFF && sudo make -j8 install
             cd /home/DAGMC
-            sudo mkdir build && sudo cd build
+            sudo mkdir build && cd build
             sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
             make -j8 install
       - run:
