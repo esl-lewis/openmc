@@ -41,14 +41,6 @@ jobs:
             sudo mv ./DAGMC/ /home/DAGMC/
             sudo chmod 777 /home/DAGMC
             ls -la
-            sudo apt-get --yes install wget
-            cd /home/circleci/project
-            mkdir nuclear_data
-            cd nuclear_data
-            wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
-            tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
-            cd endfb71_hdf5
-            ls -la
       - run:
           name: Install OpenMC requirements
           command: |
@@ -127,8 +119,13 @@ jobs:
       - run:
           name: Download Nuclear Data Libraries
           command: |
-            echo "here is where my nuclear data would be"
-            echo "if I had any nuclear data!"
+            cd /home/circleci/project
+            mkdir nuclear_data
+            cd nuclear_data
+            wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            cd endfb71_hdf5
+            export OPENMC_CROSS_SECTIONS=/home/circleci/project/nuclear_data/endfb71_hdf5/cross_sections.xml
       - run:
           name: Install and Build OpenMC
           command: |
