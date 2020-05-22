@@ -41,6 +41,12 @@ jobs:
             sudo mv ./DAGMC/ /home/DAGMC/
             sudo chmod 777 /home/DAGMC
             ls -la
+            sudo apt-get --yes install wget
+            cd /home/circleci/project
+            mkdir nuclear_data
+            cd nuclear_data
+            wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            ls -la
       - run:
           name: Install OpenMC requirements
           command: |
@@ -71,7 +77,6 @@ jobs:
             sudo apt-get --yes install hdf5-tools
             sudo apt-get --yes install paraview
             sudo apt-get --yes install eog
-            sudo apt-get --yes install wget
             sudo apt-get --yes install firefox
             sudo apt-get --yes install dpkg
             sudo apt-get --yes install libxkbfile1
@@ -118,7 +123,11 @@ jobs:
             sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
             sudo make -j8 install
       - run:
-          name: Install OpenMC
+          name: Download Nuclear Data Libraries
+          command: |
+          
+      - run:
+          name: Install and Build OpenMC
           command: |
             cd /opt/openmc
             echo "==============Build OpenMC====================="
