@@ -46,6 +46,7 @@ jobs:
             mkdir nuclear_data
             cd nuclear_data
             wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
             ls -la
       - run:
           name: Install OpenMC requirements
