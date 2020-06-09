@@ -3,29 +3,38 @@ jobs:
   build:
     docker:
       - image: cimg/base:2020.01
-        environment: 
+        environment:
           LC_CTYPE: en_US.UTF-8
           LANG: en_US.UTF-8
           LANGUAGE: en_US:en
           LC_ALL: en_US.UTF-8
-# to mimic env settings from docker file 
-#
-# sudo GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" 
-# cd /opt/NJOY/NJOY2016
-# if we want to build NJOY
-# cd /opt/NJOY/NJOY2016 && sudo mkdir build && cd build && sudo cmake -Dstatic=on .. && make 2>/dev/null && make install
+    # to mimic env settings from docker file
+    # sudo GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
     steps:
       - checkout
       - run:
-          name: Move OpenmMC to opt directory, clone MOAB and DAGMC
+          name: Move OpenmMC to opt directory, clone MOAB, DAGMC and SINBAD benchmarks
           command: |
             sudo mkdir /opt/openmc
+            echo "=============Moves openmc to correct directory location=========="
             sudo cp -r /home/circleci/project/. /opt/openmc
             sudo rm -rf /home/circlci/project
             cd /opt/openmc
-            ls -la
-            echo 'success if the code is now here'
+            echo "******Turning off StrictHostKeyChecking is insecure, solve by being more specific******"
             sudo echo -e "Host * \n   StrictHostKeyChecking no" > ~/.ssh/config
+            sudo apt-get --yes install git
+            echo "=============Set up private key for benchmarks============="
+            sudo chown circleci ssh-key
+            sudo chmod 600 ssh-key
+            eval $(ssh-agent) ssh-add ssh-key
+            echo "===================Clone and install benchmarks=================="
+            sudo mkdir ./sinbad_benchmarks           
+            sudo chmod 777 ./sinbad_benchmarks
+            cd ./sinbad_benchmarks
+            echo "====put link to fake benchmarks in here==========="
+            ls -la
+            cd /opt/openmc
+            echo "===================Clone and install MOAB=================="
             sudo mkdir ./MOAB
             sudo chmod 777 ./MOAB
             cd ./MOAB
@@ -33,6 +42,8 @@ jobs:
             cd .. 
             sudo mv ./MOAB/ /home/MOAB/
             sudo chmod 777 /home/MOAB
+            cd /opt/openmc
+            echo "===================Clone and install DAGMC=================="
             sudo mkdir ./DAGMC
             sudo chmod 777 ./DAGMC
             cd ./DAGMC
@@ -117,22 +128,34 @@ jobs:
             sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
             sudo make -j8 install
       - run:
-          name: Download Nuclear Data Libraries
-          command: |
-            cd /home/circleci/project
-            mkdir nuclear_data
-            cd nuclear_data
-            wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
-            tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
-            cd endfb71_hdf5
-            export OPENMC_CROSS_SECTIONS=/home/circleci/project/nuclear_data/endfb71_hdf5/cross_sections.xml
-      - run:
           name: Install and Build OpenMC
           command: |
             cd /opt/openmc
             echo "==============Build OpenMC====================="
             sudo mkdir build && cd build && sudo cmake -Ddebug=on -Ddagmc=ON -DDAGMC_ROOT=/home/DAGMC/ -DHDF5_PREFER_PARALLEL=OFF .. && sudo make && sudo make install
             cd /opt/openmc && sudo python3 setup.py develop
-            echo "==========Likewise git cloning the plotter will fail, looking for workaround"
-            echo "I have finished!"
-            
+            cd /opt/openmc/.circleci
+      - run:
+          name: Download Nuclear Data Libraries
+          command: |
+            cd /home/circleci/project
+            git clone https://github.com/openmc-dev/data
+            cd data
+            python convert_fendl.py --particles neutron
+            la -la 
+            cd /home/circleci/project
+            wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            ls -la 
+            cd /home/circleci/project
+            combine_libraries.py 
+            export OPENMC_CROSS_SECTIONS=/home/circleci/project/cross_sections.xml
+            ls -la
+            pwd
+            echo "OPENMC_CROSS_SECTIONS"
+      - run:
+          name: Run sinbad benchmarks
+          command: |
+            export OPENMC_CROSS_SECTIONS=/home/circleci/project/nuclear_data/endfb71_hdf5/cross_sections.xml
+            cd /opt/openmc/.circleci
+            python benchmark-neutron-spectra.py
