@@ -116,9 +116,10 @@ jobs:
             tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
             pwd
             ls -la 
-            cd /home/circleci/project
-            combine_libraries.py 
-            export OPENMC_CROSS_SECTIONS=/home/circleci/project/cross_sections.xml
+            mv endfb71_hdf5 data/endfb71_hdf5
+            cd /home/circleci/project/data
+            combine_libraries.py fendl-3.1d-hdf5/cross-sections.xml endfb71_hdf5/cross-sections.xml
+            export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
             pwd
             ls -la
             pwd
