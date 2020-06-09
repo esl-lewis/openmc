@@ -23,10 +23,6 @@ jobs:
             echo "******Turning off StrictHostKeyChecking is insecure, solve by being more specific******"
             sudo echo -e "Host * \n   StrictHostKeyChecking no" > ~/.ssh/config
             sudo apt-get --yes install git
-            echo "=============Set up private key for benchmarks============="
-            sudo chown circleci ssh-key
-            sudo chmod 600 ssh-key
-            eval $(ssh-agent) ssh-add ssh-key
             echo "===================Clone and install benchmarks=================="
             sudo mkdir ./sinbad_benchmarks           
             sudo chmod 777 ./sinbad_benchmarks
@@ -34,24 +30,6 @@ jobs:
             echo "====put link to fake benchmarks in here==========="
             ls -la
             cd /opt/openmc
-            echo "===================Clone and install MOAB=================="
-            sudo mkdir ./MOAB
-            sudo chmod 777 ./MOAB
-            cd ./MOAB
-            git clone -b Version5.1.0 https://bitbucket.org/fathomteam/moab/
-            cd .. 
-            sudo mv ./MOAB/ /home/MOAB/
-            sudo chmod 777 /home/MOAB
-            cd /opt/openmc
-            echo "===================Clone and install DAGMC=================="
-            sudo mkdir ./DAGMC
-            sudo chmod 777 ./DAGMC
-            cd ./DAGMC
-            git clone -b develop https://github.com/svalinn/dagmc
-            cd ..
-            sudo mv ./DAGMC/ /home/DAGMC/
-            sudo chmod 777 /home/DAGMC
-            ls -la
       - run:
           name: Install OpenMC requirements
           command: |
@@ -117,22 +95,12 @@ jobs:
             sudo pip3 install nose
             sudo rm /usr/bin/python
             sudo ln -s /usr/bin/python3 /usr/bin/python
-            echo "=====================Build MOAB===================="
-            cd /home/MOAB
-            sudo mkdir build && cd build
-            sudo cmake ../moab -DENABLE_HDF5=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/MOAB/
-            sudo make -j8 && sudo make -j8 install && sudo cmake ../moab -DBUILD_SHARED_LIBS=OFF && sudo make -j8 install
-            echo "=====================Build DAGMC===================="
-            cd /home/DAGMC
-            sudo mkdir build && cd build
-            sudo cmake ../dagmc -DBUILD_TALLY=ON -DCMAKE_INSTALL_PREFIX=/home/DAGMC/ -DMOAB_DIR=/home/MOAB
-            sudo make -j8 install
       - run:
           name: Install and Build OpenMC
           command: |
             cd /opt/openmc
             echo "==============Build OpenMC====================="
-            sudo mkdir build && cd build && sudo cmake -Ddebug=on -Ddagmc=ON -DDAGMC_ROOT=/home/DAGMC/ -DHDF5_PREFER_PARALLEL=OFF .. && sudo make && sudo make install
+            sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
             cd /opt/openmc && sudo python3 setup.py develop
             cd /opt/openmc/.circleci
       - run:
@@ -146,10 +114,12 @@ jobs:
             cd /home/circleci/project
             wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
             tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            pwd
             ls -la 
             cd /home/circleci/project
             combine_libraries.py 
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/cross_sections.xml
+            pwd
             ls -la
             pwd
             echo "OPENMC_CROSS_SECTIONS"
