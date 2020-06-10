@@ -117,7 +117,7 @@ jobs:
             pwd
             ls -la 
             mv endfb71_hdf5 data/endfb71_hdf5
-            cd /home/circleci/project/data
+            cd data
             combine_libraries.py fendl-3.1d-hdf5/cross-sections.xml endfb71_hdf5/cross-sections.xml
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
             pwd
