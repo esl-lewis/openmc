@@ -109,11 +109,12 @@ jobs:
             cd /home/circleci/project
             git clone https://github.com/openmc-dev/data
             cd data
-            python convert_fendl.py --particles neutron
-            ls -la 
+            python convert_fendl.py --particles neutron 
             cd /home/circleci/project
             wget https://anl.box.com/shared/static/9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
             tar xf 9igk353zpy8fn9ttvtrqgzvw1vtejoz6.xz
+            ls -la
+            pwd
             mv endfb71_hdf5 data/endfb71_hdf5
             cd endfb71_hdf5
             pwd
