@@ -110,8 +110,10 @@ jobs:
             git clone https://github.com/openmc-dev/data
             cd data
             python generate_endf71.py 
+            mv ./endfb71_hdf5/cross-sections.xml ./endf-cross-sections.xml
             python convert_fendl.py --particles neutron 
-            python combine_libraries.py --libraries ./fendl-3.1d-hdf5/cross-sections.xml ./endfb71_hdf5/cross-sections.xml
+            mv ./fendl-3.1d-hdf5/cross-sections.xml ./fendl-cross-sections.xml
+            python combine_libraries.py --libraries fendl-cross-sections.xml endf-cross-sections.xml
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
       - run:
           name: Run sinbad benchmarks
