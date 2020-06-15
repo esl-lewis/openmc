@@ -111,9 +111,10 @@ jobs:
             cd data
             python generate_endf71.py
             ls -la 
-            cd endfb71_hdf5
+            cd endf-b7.1-hdf5
             ls -la
-            mv ./endfb71_hdf5/cross-sections.xml ./endf-cross-sections.xml
+            cd ..
+            mv .endf-b7.1-hdf5/cross-sections.xml ./endf-cross-sections.xml
             python convert_fendl.py --particles neutron 
             mv ./fendl-3.1d-hdf5/cross-sections.xml ./fendl-cross-sections.xml
             python combine_libraries.py --libraries fendl-cross-sections.xml endf-cross-sections.xml
