@@ -112,7 +112,7 @@ jobs:
             python generate_endf71.py
             python convert_fendl.py --particles neutron
             ls -la
-            python combine_libraries.py --libraries /fendl-3.1d-hdf5/cross_sections.xml /endf-b7.1-hdf5/cross_sections.xml
+            python combine_libraries.py --libraries ./fendl-3.1d-hdf5/cross_sections.xml ./endf-b7.1-hdf5/cross_sections.xml
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
       - run:
           name: Run sinbad benchmarks
