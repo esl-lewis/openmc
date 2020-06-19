@@ -116,7 +116,7 @@ jobs:
           name: Run openmc with sinbad benchmarks
           command: |
             cd /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD 
-            python openmc
+            python openmc 
             python plot-spectra.py statepoint.10.h5
       - store_artifacts:
           path: /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/tallies.out
