@@ -27,8 +27,7 @@ jobs:
             sudo mkdir ./sinbad_benchmarks           
             sudo chmod 777 ./sinbad_benchmarks
             cd ./sinbad_benchmarks
-            echo "====put link to fake benchmarks in here==========="
-            ls -la
+            git clone https://github.com/esl-lewis/auto-neutronics-benchmarking.git
             cd /opt/openmc
       - run:
           name: Install OpenMC requirements
@@ -102,7 +101,6 @@ jobs:
             echo "==============Build OpenMC====================="
             sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
             cd /opt/openmc && sudo python3 setup.py develop
-            cd /opt/openmc/.circleci
       - run:
           name: Download Nuclear Data Libraries
           command: |
@@ -115,8 +113,16 @@ jobs:
             python combine_libraries.py --libraries ./fendl-3.1d-hdf5/cross_sections.xml ./endf-b7.1-hdf5/cross_sections.xml
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
       - run:
-          name: Run sinbad benchmarks
+          name: Run openmc with sinbad benchmarks
           command: |
-            export OPENMC_CROSS_SECTIONS=/home/circleci/project/nuclear_data/endfb71_hdf5/cross_sections.xml
-            cd /opt/openmc/.circleci
-            python benchmark-neutron-spectra.py
+            cd /opt/openmc/sinbad_benchmarks/mock-SINBAD 
+            python openmc
+            python plot-spectra.py statepoint.10.h5
+      - run:
+          name: Extract plot and tallies|
+      - store_artifacts:
+          path: /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/tallies.out
+          destination: neutron-tallies
+      - store_artifacts:
+          path: /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/neutron_spectra.html
+          destination: neutron-spectra-plot
