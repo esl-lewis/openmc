@@ -115,6 +115,7 @@ jobs:
       - run:
           name: Run openmc with sinbad benchmarks
           command: |
+            export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
             cd /opt/openmc/.circleci
             python sinbad-benchmark.py
             cd /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD 
