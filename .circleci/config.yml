@@ -115,7 +115,7 @@ jobs:
       - run:
           name: Run openmc with sinbad benchmarks
           command: |
-            cd /opt/openmc
+            cd /opt/openmc/.circleci
             python sinbad-benchmark.py
             cd /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD 
             python plot-spectra.py statepoint.10.h5
