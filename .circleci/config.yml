@@ -113,12 +113,12 @@ jobs:
             ls -la
             python combine_libraries.py --libraries ./fendl-3.1d-hdf5/cross_sections.xml ./endf-b7.1-hdf5/cross_sections.xml
       - run:
-          name: Run openmc with sinbad benchmarks
+          name: Run openmc with sinbad benchmarks, plot spectra
           command: |
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
             cd /opt/openmc/.circleci
             python sinbad-benchmark.py
-            mv plot-spectra.py /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/plot-spectra.py 
+            sudo smv plot-spectra.py /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/plot-spectra.py 
             cd /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD 
             python plot-spectra.py statepoint.10.h5
       ## note to have plot-spectra.py accept path to file as input to avoid it moving directories
