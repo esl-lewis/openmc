@@ -10,7 +10,7 @@ import math
 import re
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping, Iterable
-from numbers import Real
+from numbers import Real, Integral
 from warnings import warn
 
 from openmc.checkvalue import check_type, check_greater_than
@@ -46,6 +46,7 @@ _REACTIONS = [
 
 
 __all__ = ["Chain"]
+
 
 def replace_missing(product, decay_data):
     """Replace missing product with suitable decay daughter.
@@ -95,9 +96,11 @@ def replace_missing(product, decay_data):
     # Iterate until we find an existing nuclide
     while product not in decay_data:
         if Z > 98:
+            # Assume alpha decay occurs for Z=99 and above
             Z -= 2
             A -= 4
         else:
+            # Otherwise assume a beta- or beta+
             if beta_minus:
                 Z += 1
             else:
@@ -105,6 +108,54 @@ def replace_missing(product, decay_data):
         product = '{}{}'.format(openmc.data.ATOMIC_SYMBOL[Z], A)
 
     return product
+
+
+def replace_missing_fpy(actinide, fpy_data, decay_data):
+    """Replace missing fission product yields
+
+    Parameters
+    ----------
+    actinide : str
+        Name of actinide missing FPY data
+    fpy_data : dict
+        Dictionary of FPY data
+    decay_data : dict
+        Dictionary of decay data
+
+    Returns
+    -------
+    str
+        Actinide that can be used as replacement for FPY purposes
+
+    """
+
+    # Check if metastable state has data (e.g., Am242m)
+    Z, A, m = zam(actinide)
+    if m == 0:
+        metastable = gnd_name(Z, A, 1)
+        if metastable in fpy_data:
+            return metastable
+
+    # Try increasing Z, holding N constant
+    isotone = actinide
+    while isotone in decay_data:
+        Z += 1
+        A += 1
+        isotone = gnd_name(Z, A, 0)
+        if isotone in fpy_data:
+            return isotone
+
+    # Try decreasing Z, holding N constant
+    isotone = actinide
+    while isotone in decay_data:
+        Z -= 1
+        A -= 1
+        isotone = gnd_name(Z, A, 0)
+        if isotone in fpy_data:
+            return isotone
+
+    # If all else fails, use U235 yields
+    return 'U235'
 
 
 _SECONDARY_PARTICLES = {
@@ -141,7 +192,7 @@ _SECONDARY_PARTICLES = {
 }
 
 
-class Chain(object):
+class Chain:
     """Full representation of a depletion chain.
 
     A depletion chain can be created by using the :meth:`from_endf` method which
@@ -212,6 +263,16 @@ class Chain(object):
         Returns
         -------
         Chain
+
+        Notes
+        -----
+        When an actinide is missing fission product yield (FPY) data, yields will
+        copied from a parent isotope, found according to:
+
+        1. If the nuclide is in a ground state and a metastable state exists with
+           fission yields, copy the yields from the metastable
+        2. Find an isotone (same number of neutrons) and copy those yields
+        3. Copy the yields of U235 if the previous two checks fail
 
         """
         chain = cls()
@@ -288,6 +349,7 @@ class Chain(object):
                     # Append decay mode
                     nuclide.decay_modes.append(DecayTuple(type_, target, br))
 
+            fissionable = False
             if parent in reactions:
                 reactions_available = set(reactions[parent].keys())
                 for name, mts, changes in _REACTIONS:
@@ -314,19 +376,22 @@ class Chain(object):
                         nuclide.reactions.append(ReactionTuple(
                             name, daughter, q_value, 1.0))
 
-                if any(mt in reactions_available for mt in [18, 19, 20, 21, 38]):
-                    if parent in fpy_data:
-                        q_value = reactions[parent][18]
-                        nuclide.reactions.append(
-                            ReactionTuple('fission', 0, q_value, 1.0))
+                if any(mt in reactions_available for mt in openmc.data.FISSION_MTS):
+                    q_value = reactions[parent][18]
+                    nuclide.reactions.append(
+                        ReactionTuple('fission', None, q_value, 1.0))
+                    fissionable = True
 
-                        if 'fission' not in chain.reactions:
-                            chain.reactions.append('fission')
-                    else:
-                        missing_fpy.append(parent)
+                    if 'fission' not in chain.reactions:
+                        chain.reactions.append('fission')
 
-            if parent in fpy_data:
-                fpy = fpy_data[parent]
+            if fissionable:
+                if parent in fpy_data:
+                    fpy = fpy_data[parent]
+                else:
+                    nuclide._fpy = replace_missing_fpy(parent, fpy_data, decay_data)
+                    missing_fpy.append((parent, nuclide._fpy))
+                    continue
 
                 if fpy.energies is not None:
                     yield_energies = fpy.energies
@@ -334,10 +399,10 @@ class Chain(object):
                     yield_energies = [0.0]
 
                 yield_data = {}
-                for E, table in zip(yield_energies, fpy.independent):
+                for E, yield_table in zip(yield_energies, fpy.independent):
                     yield_replace = 0.0
                     yields = defaultdict(float)
-                    for product, y in table.items():
+                    for product, y in yield_table.items():
                         # Handle fission products that have no decay data
                         if product not in decay_data:
                             daughter = replace_missing(product, decay_data)
@@ -351,6 +416,11 @@ class Chain(object):
                     yield_data[E] = yields
 
                 nuclide.yield_data = FissionYieldDistribution(yield_data)
+
+        # Replace missing FPY data
+        for nuclide in chain.nuclides:
+            if hasattr(nuclide, '_fpy'):
+                nuclide.yield_data = chain[nuclide._fpy].yield_data
 
         # Display warnings
         if missing_daughter:
@@ -367,8 +437,8 @@ class Chain(object):
 
         if missing_fpy:
             print('The following fissionable nuclides have no fission product yields:')
-            for parent in missing_fpy:
-                print('  ' + parent)
+            for parent, replacement in missing_fpy:
+                print('  {}, replaced with {}'.format(parent, replacement))
             print('')
 
         if missing_fp:
@@ -404,7 +474,7 @@ class Chain(object):
         for i, nuclide_elem in enumerate(root.findall('nuclide')):
             this_q = fission_q.get(nuclide_elem.get("name"))
 
-            nuc = Nuclide.from_xml(nuclide_elem, this_q)
+            nuc = Nuclide.from_xml(nuclide_elem, root, this_q)
             chain.nuclide_dict[nuc.name] = i
 
             # Check for reaction paths
@@ -488,19 +558,17 @@ class Chain(object):
             fission_yields = self.get_default_fission_yields()
 
         for i, nuc in enumerate(self.nuclides):
-
-            if nuc.n_decay_modes != 0:
-                # Decay paths
-                # Loss
+            # Loss from radioactive decay
+            if nuc.half_life is not None:
                 decay_constant = math.log(2) / nuc.half_life
-
                 if decay_constant != 0.0:
                     matrix[i, i] -= decay_constant
 
-                # Gain
+            # Gain from radioactive decay
+            if nuc.n_decay_modes != 0:
                 for _, target, branching_ratio in nuc.decay_modes:
                     # Allow for total annihilation for debug purposes
-                    if target != 'Nothing':
+                    if target is not None:
                         branch_val = branching_ratio * decay_constant
 
                         if branch_val != 0.0:
@@ -525,17 +593,25 @@ class Chain(object):
                             matrix[i, i] -= path_rate
 
                     # Gain term; allow for total annihilation for debug purposes
-                    if target != 'Nothing':
-                        if r_type != 'fission':
-                            if path_rate != 0.0:
-                                k = self.nuclide_dict[target]
+                    if r_type != 'fission':
+                        if target is not None and path_rate != 0.0:
+                            k = self.nuclide_dict[target]
+                            matrix[k, i] += path_rate * br
+
+                        # Determine light nuclide production, e.g., (n,d) should
+                        # produce H2
+                        light_nucs = _SECONDARY_PARTICLES.get(r_type, [])
+                        for light_nuc in light_nucs:
+                            k = self.nuclide_dict.get(light_nuc)
+                            if k is not None:
                                 matrix[k, i] += path_rate * br
-                        else:
-                            for product, y in fission_yields[nuc.name].items():
-                                yield_val = y * path_rate
-                                if yield_val != 0.0:
-                                    k = self.nuclide_dict[product]
-                                    matrix[k, i] += yield_val
+
+                    else:
+                        for product, y in fission_yields[nuc.name].items():
+                            yield_val = y * path_rate
+                            if yield_val != 0.0:
+                                k = self.nuclide_dict[product]
+                                matrix[k, i] += yield_val
 
                 # Clear set of reactions
                 reactions.clear()
@@ -736,26 +812,27 @@ class Chain(object):
             rxn_Q = parent.reactions[rxn_index[0]].Q
 
             # Remove existing reactions
-
             for ix in reversed(rxn_index):
                 parent.reactions.pop(ix)
 
+            # Add new reactions
             all_meta = True
-
-            for tgt, br in new_ratios.items():
-                all_meta = all_meta and ("_m" in tgt)
+            for target, br in new_ratios.items():
+                all_meta = all_meta and ("_m" in target)
                 parent.reactions.append(ReactionTuple(
-                    reaction, tgt, rxn_Q, br))
+                    reaction, target, rxn_Q, br))
 
+            # If branching ratios don't add to unity, add reaction to ground
+            # with remainder of branching ratio
             if all_meta and sums[parent_name] != 1.0:
                 ground_br = 1.0 - sums[parent_name]
-                ground_tgt = grounds.get(parent_name)
-                if ground_tgt is None:
+                ground_target = grounds.get(parent_name)
+                if ground_target is None:
                     pz, pa, pm = zam(parent_name)
-                    ground_tgt = gnd_name(pz, pa + 1, 0)
-                new_ratios[ground_tgt] = ground_br
+                    ground_target = gnd_name(pz, pa + 1, 0)
+                new_ratios[ground_target] = ground_br
                 parent.reactions.append(ReactionTuple(
-                    reaction, ground_tgt, rxn_Q, ground_br))
+                    reaction, ground_target, rxn_Q, ground_br))
 
     @property
     def fission_yields(self):
@@ -821,3 +898,178 @@ class Chain(object):
                 return stat
             valid = valid and stat
         return valid
+
+    def reduce(self, initial_isotopes, level=None):
+        """Reduce the size of the chain by following transmutation paths
+
+        As an example, consider a simple chain with the following
+        isotopes and transmutation paths::
+
+            U235 (n,gamma) U236
+                 (n,fission) (Xe135, I135, Cs135)
+            I135 (beta decay) Xe135 (beta decay) Cs135
+            Xe135 (n,gamma) Xe136
+
+        Calling ``chain.reduce(["I135"])`` will produce a depletion
+        chain that contains only isotopes that would originate from
+        I135: I135, Xe135, Cs135, and Xe136. U235 and U236 will not
+        be included, but multiple isotopes can be used to start
+        the search.
+
+        The ``level`` value controls the depth of the search.
+        ``chain.reduce(["U235"], level=1)`` would return a chain
+        with all isotopes except Xe136, since it is two transmutations
+        removed from U235 in this case.
+
+        While targets will not be included in the new chain, the
+        total destruction rate and decay rate of included isotopes
+        will be preserved.
+
+        Parameters
+        ----------
+        initial_isotopes : iterable of str
+            Start the search based on the contents of these isotopes
+        level : int, optional
+            Depth of transmuation path to follow. Must be greater than
+            or equal to zero. A value of zero returns a chain with
+            ``initial_isotopes``. The default value of None implies
+            that all isotopes that appear in the transmutation paths
+            of the initial isotopes and their progeny should be
+            explored
+
+        Returns
+        -------
+        Chain
+            Depletion chain containing isotopes that would appear
+            after following up to ``level`` reactions and decay paths
+
+        """
+        check_type("initial_isotopes", initial_isotopes, Iterable, str)
+        if level is None:
+            level = math.inf
+        else:
+            check_type("level", level, Integral)
+            check_greater_than("level", level, 0, equality=True)
+
+        all_isotopes = self._follow(set(initial_isotopes), level)
+
+        # Avoid re-sorting for fission yields
+        name_sort = sorted(all_isotopes)
+
+        nuclides = []
+        nuclide_dict = {}
+        reactions = set()
+
+        for idx, iso in enumerate(sorted(all_isotopes, key=openmc.data.zam)):
+            previous = self[iso]
+            new_nuclide = Nuclide(previous.name)
+            new_nuclide.half_life = previous.half_life
+            new_nuclide.decay_energy = previous.decay_energy
+
+            new_decay = []
+            for mode in previous.decay_modes:
+                if mode.target in all_isotopes:
+                    new_decay.append(mode)
+                else:
+                    new_decay.append(DecayTuple(
+                        mode.type, None, mode.branching_ratio))
+            new_nuclide.decay_modes = new_decay
+
+            new_reactions = []
+            for rxn in previous.reactions:
+                if rxn.target in all_isotopes:
+                    new_reactions.append(rxn)
+                    reactions.add(rxn.type)
+                elif rxn.type == "fission":
+                    new_yields = new_nuclide.yield_data = (
+                        previous.yield_data.restrict_products(name_sort))
+                    if new_yields is not None:
+                        new_reactions.append(rxn)
+                        reactions.add("fission")
+                # Maintain total destruction rates but set no target
+                else:
+                    new_reactions.append(ReactionTuple(
+                        rxn.type, None, rxn.Q, rxn.branching_ratio))
+                    reactions.add(rxn.type)
+
+            new_nuclide.reactions = new_reactions
+
+            nuclides.append(new_nuclide)
+            nuclide_dict[iso] = idx
+
+        new_chain = type(self)()
+        new_chain.nuclides = nuclides
+        new_chain.nuclide_dict = nuclide_dict
+
+        # Doesn't appear that the ordering matters for the reactions,
+        # just the contents
+        new_chain.reactions = sorted(reactions)
+
+        return new_chain
+
+    def _follow(self, isotopes, level):
+        """Return all isotopes present up to depth level"""
+        found = isotopes.copy()
+        remaining = set(self.nuclide_dict)
+        if not found.issubset(remaining):
+            raise IndexError(
+                "The following isotopes were not found in the chain: "
+                "{}".format(", ".join(found - remaining)))
+
+        if level == 0:
+            return found
+
+        remaining -= found
+
+        depth = 0
+        next_iso = set()
+
+        while depth < level and remaining:
+            # Exhaust all isotopes at this level
+            while isotopes:
+                iso = isotopes.pop()
+                found.add(iso)
+                nuclide = self[iso]
+
+                # Follow all transmutation paths for this nuclide
+                for rxn in nuclide.reactions + nuclide.decay_modes:
+                    if rxn.type == "fission":
+                        continue
+
+                    # Figure out if this reaction produces light nuclides
+                    secondaries = _SECONDARY_PARTICLES.get(rxn.type, [])
+
+                    # Only include secondaries if they are present in original chain
+                    secondaries = [x for x in secondaries if x in self]
+
+                    for product in chain([rxn.target], secondaries):
+                        if product is None:
+                            continue
+                        # Skip if we've already come across this isotope
+                        elif (product in next_iso or product in found
+                              or product in isotopes):
+                            continue
+                        next_iso.add(product)
+
+                if nuclide.yield_data is not None:
+                    for product in nuclide.yield_data.products:
+                        if (product in next_iso
+                                or product in found or product in isotopes):
+                            continue
+                        next_iso.add(product)
+
+            if not next_iso:
+                # No additional isotopes to process, nor to update the
+                # current set of discovered isotopes
+                return found
+
+            # Prepare for next dig
+            depth += 1
+            isotopes |= next_iso
+            remaining -= next_iso
+            next_iso.clear()
+
+        # Process isotope that would have started next depth
+        found.update(isotopes)
+
+        return found
