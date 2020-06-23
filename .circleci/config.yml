@@ -98,6 +98,7 @@ jobs:
       - run:
           name: Install and Build OpenMC
           command: |
+            sudo echo -e "Host * \n   StrictHostKeyChecking no" > ~/.ssh/config
             cd /opt/openmc
             echo "==============Build OpenMC====================="
             sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
