@@ -1,0 +1,130 @@
+version: 2.0
+jobs:
+  build:
+    docker:
+      - image: cimg/base:2020.01
+        environment:
+          LC_CTYPE: en_US.UTF-8
+          LANG: en_US.UTF-8
+          LANGUAGE: en_US:en
+          LC_ALL: en_US.UTF-8
+    # to mimic env settings from docker file
+    # sudo GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    steps:
+      - checkout
+      - run:
+          name: Move OpenmMC to opt directory, clone MOAB, DAGMC and SINBAD benchmarks
+          command: |
+            sudo mkdir /opt/openmc
+            echo "=============Moves openmc to correct directory location=========="
+            sudo cp -r /home/circleci/project/. /opt/openmc
+            sudo rm -rf /home/circlci/project
+            cd /opt/openmc
+            echo "******Turning off StrictHostKeyChecking is insecure, solve by being more specific******"
+            sudo echo -e "Host * \n   StrictHostKeyChecking no" > ~/.ssh/config
+            sudo apt-get --yes install git
+            echo "===================Clone and install benchmarks=================="
+            sudo mkdir ./sinbad_benchmarks           
+            sudo chmod 777 ./sinbad_benchmarks
+            cd ./sinbad_benchmarks
+            git clone https://github.com/esl-lewis/auto-neutronics-benchmarking.git
+            cd /opt/openmc
+      - run:
+          name: Install OpenMC requirements
+          command: |
+            echo "=============Install required packages============="
+            sudo apt-get --yes update && sudo apt-get --yes upgrade
+            sudo apt-get -y install locales
+            sudo apt-get --yes install cmake
+            sudo apt-get --yes install curl
+            sudo apt-get --yes install wget
+            sudo apt-get --yes install gfortran 
+            sudo apt-get --yes install g++ 
+            sudo apt-get --yes install libhdf5-dev 
+            sudo apt-get --yes install git
+            sudo apt-get update
+            sudo apt-get install -y python3-pip
+            sudo apt-get install -y python3-dev
+            sudo apt-get install -y python3-setuptools
+            ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+            sudo apt-get install -y ipython3
+            sudo apt-get update
+            sudo apt-get install -y python3-tk
+            echo "=============Install unzip==================="
+            sudo apt-get update
+            sudo apt-get install -y unzip
+            echo "============Install optional packages=========="
+            sudo apt-get --yes update
+            sudo apt-get --yes install imagemagick
+            sudo apt-get --yes install hdf5-tools
+            sudo apt-get --yes install paraview
+            sudo apt-get --yes install eog
+            sudo apt-get --yes install firefox
+            sudo apt-get --yes install dpkg
+            sudo apt-get --yes install libxkbfile1
+            echo "=========Install optional packages for distributed memory parallel simulations========="
+            sudo apt install --yes mpich libmpich-dev
+            sudo apt install --yes openmpi-bin libopenmpi-dev
+            sudo apt-get --yes install libblas-dev 
+            sudo apt-get --yes install liblapack-dev
+            echo "================Install required Python prerequisites===================="
+            sudo pip3 install numpy
+            sudo pip3 install pandas
+            sudo pip3 install six
+            sudo pip3 install h5py
+            sudo pip3 install Matplotlib
+            sudo pip3 install uncertainties
+            sudo pip3 install lxml
+            sudo pip3 install scipy
+            sudo pip3 install plotly
+            echo "==================Install optional Python prerequisites===================="
+            sudo pip3 install cython
+            sudo pip3 install vtk
+            sudo apt-get install --yes libsilo-dev
+            sudo pip3 install pytest
+            sudo pip3 install codecov
+            sudo pip3 install pytest-cov
+            sudo pip3 install pylint
+            echo "===================Install Pyne requirements=================="
+            sudo pip3 install tables
+            sudo pip3 install setuptools
+            sudo pip3 install prettytable
+            sudo pip3 install sphinxcontrib_bibtex
+            sudo pip3 install numpydoc
+            sudo pip3 install nbconvert
+            sudo pip3 install nose
+            sudo rm /usr/bin/python
+            sudo ln -s /usr/bin/python3 /usr/bin/python
+      - run:
+          name: Install and Build OpenMC
+          command: |
+            cd /opt/openmc
+            echo "==============Build OpenMC====================="
+            sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
+            cd /opt/openmc && sudo python3 setup.py develop
+      - run:
+          name: Download Nuclear Data Libraries
+          command: |
+            cd /home/circleci/project
+            git clone https://github.com/openmc-dev/data
+            cd data
+            python generate_endf71.py
+            python convert_fendl.py --particles neutron
+            ls -la
+            python combine_libraries.py --libraries ./fendl-3.1d-hdf5/cross_sections.xml ./endf-b7.1-hdf5/cross_sections.xml
+      - run:
+          name: Run openmc with sinbad benchmarks, plot spectra
+          command: |
+            export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
+            cd /opt/openmc/.circleci
+            python sinbad-benchmark.py
+            sudo smv plot-spectra.py /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/plot-spectra.py 
+            cd /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD 
+            python plot-spectra.py statepoint.10.h5
+      ## note to have plot-spectra.py accept path to file as input to avoid it moving directories
+      - store_artifacts:
+          path: /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/tallies.out
+          destination: neutron-tallies
+      - store_artifacts:
+          path: /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/neutron_spectra.html
+          destination: neutron-spectra-plot
