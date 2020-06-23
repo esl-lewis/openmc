@@ -103,7 +103,7 @@ jobs:
             sudo chmod -R 777 /opt/openmc
             cd /opt/openmc
             echo "==============Build OpenMC====================="
-            sudo mkdir build && cd build && cmake -Ddebug=on .. && make && make install
+            sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
             cd /opt/openmc && sudo python3 setup.py develop
       - run:
           name: Download Nuclear Data Libraries
