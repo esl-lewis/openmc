@@ -119,7 +119,7 @@ jobs:
             export OPENMC_CROSS_SECTIONS=/home/circleci/project/data/cross_sections.xml
             cd /opt/openmc/.circleci
             python sinbad-benchmark.py
-            sudo smv plot-spectra.py /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/plot-spectra.py 
+            sudo mv plot-spectra.py /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD/plot-spectra.py 
             cd /opt/openmc/sinbad_benchmarks/auto-neutronics-benchmarking/mock-SINBAD 
             python plot-spectra.py statepoint.10.h5
       ## note to have plot-spectra.py accept path to file as input to avoid it moving directories
