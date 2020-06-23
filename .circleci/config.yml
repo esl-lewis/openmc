@@ -102,7 +102,7 @@ jobs:
             git submodule update
             cd /opt/openmc
             echo "==============Build OpenMC====================="
-            sudo mkdir build && cd build && cmake -Ddebug=on .. && make && make install
+            sudo mkdir build && cd build && chmod 777 build && cmake -Ddebug=on .. && make && make install
             cd /opt/openmc && sudo python3 setup.py develop
       - run:
           name: Download Nuclear Data Libraries
