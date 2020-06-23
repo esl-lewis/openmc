@@ -100,7 +100,7 @@ jobs:
           command: |
             git submodule init
             git submodule update
-            sudo apt-get remove git
+            sudo apt-get remove -y git
             cd /opt/openmc
             echo "==============Build OpenMC====================="
             sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
