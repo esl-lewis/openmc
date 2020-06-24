@@ -102,7 +102,7 @@ jobs:
             git submodule update
             cd /opt/openmc/
             echo "==============Build OpenMC====================="
-            rm CMakeLists.txt
+            rm -f CMakeLists.txt
             mv ./.circleci/no_git_check_CMakeLists.txt ./CMakeLists.txt
             sudo mkdir build && cd build && sudo cmake -Ddebug=on .. && sudo make && sudo make install
             cd /opt/openmc && sudo python3 setup.py develop
