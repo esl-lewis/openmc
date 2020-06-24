@@ -99,8 +99,9 @@ jobs:
           name: Install and Build OpenMC
           command: |
             cd /opt/openmc/
-            sudo git submodule init
-            sudo git submodule update
+            sudo chown circleci -R .git
+            git submodule init
+            git submodule update
             echo "==============Build OpenMC====================="
             sudo rm -f CMakeLists.txt
             sudo mv ./.circleci/no_git_check_CMakeLists.txt ./CMakeLists.txt
