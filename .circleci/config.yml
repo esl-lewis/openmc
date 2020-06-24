@@ -100,6 +100,7 @@ jobs:
           command: |
             cd /opt/openmc/
             sudo chown circleci -R .git
+            sudo chown circleci -R vendor
             git submodule init
             git submodule update
             echo "==============Build OpenMC====================="
